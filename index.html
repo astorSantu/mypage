@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>安知鱼的星际站</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: #0a0e1a;
+      color: #e0e8f0;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+    a { color: #7ec8f0; text-decoration: none; transition: 0.3s; }
+    a:hover { color: #b0e0ff; text-shadow: 0 0 12px rgba(126,200,240,0.6); }
+
+    #starfield {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .planet {
+      position: fixed;
+      border-radius: 50%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.3;
+    }
+    .planet-1 {
+      width: 180px; height: 180px;
+      background: radial-gradient(circle at 35% 35%, #ff9a9e, #fad0c4, #a18cd1);
+      top: -40px; right: -40px;
+      box-shadow: 0 0 80px rgba(161,140,209,0.3);
+      animation: float 20s ease-in-out infinite;
+    }
+    .planet-2 {
+      width: 100px; height: 100px;
+      background: radial-gradient(circle at 30% 30%, #a8edea, #fed6e3);
+      bottom: 10%; left: -30px;
+      box-shadow: 0 0 60px rgba(168,237,234,0.2);
+      animation: float 25s ease-in-out infinite reverse;
+    }
+    .planet-3 {
+      width: 60px; height: 60px;
+      background: radial-gradient(circle at 40% 40%, #ffecd2, #fcb69f);
+      top: 50%; right: 15%;
+      opacity: 0.2;
+      animation: float 18s ease-in-out infinite 5s;
+    }
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(20px, -30px) rotate(5deg); }
+      66% { transform: translate(-10px, 20px) rotate(-3deg); }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 60px 24px 120px;
+    }
+
+    header {
+      text-align: center;
+      padding: 80px 0 60px;
+    }
+    .avatar {
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      border: 3px solid rgba(126,200,240,0.4);
+      box-shadow: 0 0 40px rgba(126,200,240,0.15);
+      object-fit: cover;
+      margin-bottom: 20px;
+      transition: 0.5s;
+    }
+    .avatar:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 60px rgba(126,200,240,0.3);
+    }
+    header h1 {
+      font-size: 2.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #7ec8f0, #a18cd1, #fad0c4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 2px;
+    }
+    header p {
+      margin-top: 12px;
+      font-size: 1.1rem;
+      color: #8899aa;
+      line-height: 1.8;
+    }
+    header .tag {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 6px 20px;
+      border: 1px solid rgba(126,200,240,0.3);
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: #7ec8f0;
+      letter-spacing: 1px;
+    }
+
+    .social {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin: 24px 0 0;
+    }
+    .social a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      border: 1px solid rgba(126,200,240,0.2);
+      font-size: 1.1rem;
+      transition: 0.3s;
+    }
+    .social a:hover {
+      border-color: #7ec8f0;
+      box-shadow: 0 0 20px rgba(126,200,240,0.2);
+      transform: translateY(-3px);
+    }
+
+    .divider {
+      width: 60px; height: 2px;
+      background: linear-gradient(90deg, transparent, #7ec8f0, transparent);
+      margin: 40px auto;
+      opacity: 0.5;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title .icon { font-size: 1.3rem; }
+
+    /* 作品卡片 */
+    .projects {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .project-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 24px;
+      transition: 0.3s;
+      backdrop-filter: blur(4px);
+    }
+    .project-card:hover {
+      border-color: rgba(126,200,240,0.2);
+      background: rgba(255,255,255,0.06);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    }
+    .project-card h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #c0d0e0;
+    }
+    .project-card .meta {
+      font-size: 0.8rem;
+      color: #6a7a8a;
+      margin-top: 4px;
+    }
+    .project-card p {
+      margin-top: 10px;
+      font-size: 0.92rem;
+      color: #99aabb;
+      line-height: 1.6;
+    }
+    .project-card .links {
+      margin-top: 12px;
+      display: flex;
+      gap: 16px;
+      font-size: 0.88rem;
+    }
+
+    /* 文章列表 */
+    .post-list { list-style: none; }
+    .post-list li {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .post-list li:last-child { border-bottom: none; }
+    .post-date {
+      font-size: 0.8rem;
+      color: #5a6a7a;
+      flex-shrink: 0;
+      min-width: 70px;
+    }
+    .post-title {
+      font-size: 0.95rem;
+      color: #b0c0d0;
+    }
+    .post-list li:hover .post-title { color: #7ec8f0; }
+
+    /* 关于 */
+    .about-text {
+      font-size: 0.95rem;
+      line-height: 1.9;
+      color: #99aabb;
+    }
+
+    /* 兴趣板块 */
+    .hobby-block {
+      margin-bottom: 20px;
+    }
+    .hobby-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #c0d0e0;
+      margin-bottom: 8px;
+    }
+    .hobby-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .hobby-tag {
+      display: inline-block;
+      padding: 5px 14px;
+      border: 1px solid rgba(126,200,240,0.2);
+      border-radius: 14px;
+      font-size: 0.85rem;
+      color: #7ec8f0;
+      background: rgba(126,200,240,0.05);
+      transition: 0.2s;
+    }
+    .hobby-tag:hover {
+      border-color: rgba(126,200,240,0.5);
+      background: rgba(126,200,240,0.1);
+    }
+
+    /* 联系方式 */
+    .contact-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 28px;
+    }
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      font-size: 0.88rem;
+      color: #99aabb;
+      transition: 0.3s;
+    }
+    .contact-item:hover {
+      border-color: rgba(126,200,240,0.3);
+      color: #c0d0e0;
+    }
+
+    footer {
+      text-align: center;
+      padding: 60px 0 40px;
+      font-size: 0.8rem;
+      color: #4a5a6a;
+    }
+    footer .stars { letter-spacing: 4px; color: #7ec8f0; opacity: 0.3; }
+
+    @media (max-width: 600px) {
+      header { padding: 50px 0 30px; }
+      header h1 { font-size: 2rem; }
+      .container { padding: 30px 16px 80px; }
+      .post-list li { flex-direction: column; gap: 4px; }
+      .post-date { min-width: auto; }
+    }
+  </style>
+</head>
+<body>
+<canvas id="starfield"></canvas>
+<div class="planet planet-1"></div>
+<div class="planet planet-2"></div>
+<div class="planet planet-3"></div>
+
+<div class="container">
+  <header>
+    <img class="avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Ccircle cx='100' cy='100' r='95' fill='%230a0e1a' stroke='%237ec8f0' stroke-width='2'/%3E%3Ctext x='100' y='120' text-anchor='middle' font-size='80'%3E🐱%3C/text%3E%3C/svg%3E" alt="avatar">
+    <h1>安知鱼</h1>
+    <p>助手小满 · 在代码与星辰之间，做一个有趣的人</p>
+    <span class="tag">✦ 独立开发者 · 动漫迷 · B站UP主 ✦</span>
+    <div class="social">
+      <a href="https://space.bilibili.com/472923642?spm_id_from=333.1007.0.0" title="B站" target="_blank">▶</a>
+      <a href="https://weibo.com/u/7305048592" title="微博" target="_blank">◎</a>
+      <a href="https://www.douyin.com/user/self?from_tab_name=main" title="抖音" target="_blank">♪</a>
+      <a href="#" title="GitHub">⌂</a>
+    </div>
+  </header>
+
+  <div class="divider"></div>
+
+  <!-- 作品 -->
+  <section>
+    <h2 class="section-title"><span class="icon">🚀</span> 作品集</h2>
+    <div class="projects">
+      <div class="project-card">
+        <h3>星际导航 · 动漫推荐站</h3>
+        <div class="meta">2026 · React + Tailwind</div>
+        <p>一个以太空为背景的动漫推荐网站，用户可以像在星图中导航一样发现新番。</p>
+        <div class="links">
+          <a href="#">在线体验 →</a>
+          <a href="#">源码 →</a>
+        </div>
+      </div>
+      <div class="project-card">
+        <h3>JD 价格监控工具</h3>
+        <div class="meta">2026 · Python + PyInstaller</div>
+        <p>双击即用的京东商品降价提醒工具，自动检测价格变化，降价弹窗+邮件通知。</p>
+        <div class="links">
+          <a href="#">了解更多 →</a>
+        </div>
+      </div>
+      <div class="project-card">
+        <h3>次元笔记 · 跨平台剪藏</h3>
+        <div class="meta">2025 · Chrome Extension + GitHub Sync</div>
+        <p>浏览器插件，一键保存网页片段到 GitHub 仓库，支持标签分类和全文检索。</p>
+        <div class="links">
+          <a href="#">源码 →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- 博客 -->
+  <section>
+    <h2 class="section-title"><span class="icon">🌌</span> 最近更新</h2>
+    <ul class="post-list">
+      <li>
+        <span class="post-date">2026.07.09</span>
+        <span class="post-title">用 AI 写了一个太空主题的个人网站</span>
+      </li>
+      <li>
+        <span class="post-date">2026.07.05</span>
+        <span class="post-title">京东价格监控工具开发踩坑记</span>
+      </li>
+      <li>
+        <span class="post-date">2026.06.28</span>
+        <span class="post-title">推荐几部太空题材的动漫</span>
+      </li>
+      <li>
+        <span class="post-date">2026.06.20</span>
+        <span class="post-title">从零搭建自己的个人网站</span>
+      </li>
+      <li>
+        <span class="post-date">2026.06.12</span>
+        <span class="post-title">独立开发半年，我学到了什么</span>
+      </li>
+    </ul>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- 关于 -->
+  <section>
+    <h2 class="section-title"><span class="icon">💫</span> 关于我</h2>
+    <p class="about-text">
+      一个在代码世界里游荡的旅人。白天写 Python 和 JavaScript，晚上看番听 OST。
+      喜欢一切关于太空的事物——从《星际牛仔》到《三体》，从韦伯望远镜到 SpaceX。
+    </p>
+    <p class="about-text" style="margin-top:12px;">
+      这个站点是我的小宇宙，记录我写过的代码、看过的番、想过的事。
+      如果你也喜欢星空和动漫，欢迎来聊聊 🚀
+    </p>
+
+    <!-- 兴趣板块 -->
+    <div style="margin-top: 28px;">
+
+      <div class="hobby-block">
+        <div class="hobby-title">🎮 游戏</div>
+        <div class="hobby-tags">
+          <span class="hobby-tag">无畏契约</span>
+          <span class="hobby-tag">第五人格</span>
+          <span class="hobby-tag">超自然行动组</span>
+          <span class="hobby-tag">LOL</span>
+        </div>
+      </div>
+
+      <div class="hobby-block">
+        <div class="hobby-title">🎵 音乐</div>
+        <div class="hobby-tags">
+          <span class="hobby-tag">待补充</span>
+        </div>
+      </div>
+
+      <div class="hobby-block">
+        <div class="hobby-title">🍜 美食</div>
+        <div class="hobby-tags">
+          <span class="hobby-tag">待补充</span>
+        </div>
+      </div>
+
+      <div class="hobby-block">
+        <div class="hobby-title">📺 番剧 / 影视</div>
+        <div class="hobby-tags">
+          <span class="hobby-tag">待补充</span>
+        </div>
+      </div>
+
+      <div class="hobby-block">
+        <div class="hobby-title">✨ 其他</div>
+        <div class="hobby-tags">
+          <span class="hobby-tag">待补充</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="contact-grid">
+      <span class="contact-item">▶ bilibili.com/安知鱼</span>
+      <span class="contact-item">◎ weibo.com/安知鱼</span>
+      <span class="contact-item">♪ douyin.com/安知鱼</span>
+      <span class="contact-item">⌂ github.com/安知鱼</span>
+    </div>
+  </section>
+
+  <footer>
+    <div class="stars">✦ ✦ ✦ ✦ ✦</div>
+    <p style="margin-top:16px;">© 2026 安知鱼 · 助手小满 🐱</p>
+  </footer>
+</div>
+
+<script>
+const canvas = document.getElementById('starfield');
+const ctx = canvas.getContext('2d');
+let stars = [];
+let w, h;
+
+function resize() {
+  w = canvas.width = window.innerWidth;
+  h = canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+const STAR_COUNT = 300;
+for (let i = 0; i < STAR_COUNT; i++) {
+  stars.push({
+    x: Math.random() * w,
+    y: Math.random() * h,
+    r: Math.random() * 2 + 0.3,
+    alpha: Math.random() * 0.8 + 0.2,
+    speed: Math.random() * 0.02 + 0.005,
+    phase: Math.random() * Math.PI * 2,
+  });
+}
+
+const SHOOTING_STAR_INTERVAL = 4000;
+let shootingStars = [];
+
+function spawnShootingStar() {
+  shootingStars.push({
+    x: Math.random() * w,
+    y: Math.random() * h * 0.3,
+    len: Math.random() * 120 + 60,
+    speed: Math.random() * 6 + 4,
+    angle: Math.PI / 4 + (Math.random() - 0.5) * 0.3,
+    alpha: 1,
+    life: 1,
+  });
+}
+
+setInterval(spawnShootingStar, SHOOTING_STAR_INTERVAL);
+setTimeout(spawnShootingStar, 500);
+
+let time = 0;
+function draw() {
+  time += 0.01;
+  ctx.clearRect(0, 0, w, h);
+
+  for (const s of stars) {
+    const blink = 0.6 + 0.4 * Math.sin(time * s.speed * 10 + s.phase);
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255, 255, 255, ${s.alpha * blink})`;
+    ctx.fill();
+  }
+
+  shootingStars = shootingStars.filter(s => s.life > 0);
+  for (const s of shootingStars) {
+    const dx = Math.cos(s.angle) * s.speed;
+    const dy = Math.sin(s.angle) * s.speed;
+    const tailX = s.x - Math.cos(s.angle) * s.len;
+    const tailY = s.y - Math.sin(s.angle) * s.len;
+
+    const grad = ctx.createLinearGradient(s.x, s.y, tailX, tailY);
+    grad.addColorStop(0, `rgba(255, 255, 255, ${s.alpha})`);
+    grad.addColorStop(1, `rgba(255, 255, 255, 0)`);
+
+    ctx.beginPath();
+    ctx.moveTo(s.x, s.y);
+    ctx.lineTo(tailX, tailY);
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    s.x += dx;
+    s.y += dy;
+    s.life -= 0.005;
+    s.alpha = s.life;
+  }
+
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>
